@@ -7,8 +7,8 @@ public class SwitchComponent extends Component {
     private int onCode;
     private int offCode;
 
-    public SwitchComponent(String name, int id, boolean state, int onCode, int offCode) {
-        super(name, ComponentType.SWITCH);
+    public SwitchComponent(String name, Location location, int id, boolean state, int onCode, int offCode) {
+        super(name, location, ComponentType.SWITCH);
         this.id = id;
         this.on = state;
         this.onCode = onCode;
@@ -33,25 +33,5 @@ public class SwitchComponent extends Component {
 
     public int getId() {
         return id;
-    }
-
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public void setName(String name) {
-
-    }
-
-    @Override
-    public ComponentType getComponentType() {
-        return null;
-    }
-
-    @Override
-    public void setComponentType(ComponentType componentType) {
-
     }
 }
