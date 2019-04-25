@@ -9,10 +9,10 @@ public class Application extends Jooby {
 
     private final Config config;
     private final Database database;
-    private final Helpers helpers = new Helpers();
+    private final Helpers helpers;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-    {
+    private void startServer() {
         get("/switches/{id}/state", (req, rsp) -> {
             rsp.type("application/json").send(new JSONObject()
                     .put("state", req.param("id").intValue())
@@ -33,7 +33,7 @@ public class Application extends Jooby {
             );
         });
 
-        put("/irsender/{id}", (req, rsp) -> {
+        post("/irsender/{id}", (req, rsp) -> {
             rsp.type("application/json").send(new JSONObject()
                     .put("status", "success")
             );
@@ -42,8 +42,10 @@ public class Application extends Jooby {
         });
 
         get("/presets/list", (req, rsp) -> {
+            boolean globalPresets = req.param("global").booleanValue();
+
             rsp.type("application/json").send(new JSONObject()
-                    .put("presetArray", helpers.getPresetList())
+                    .put("presets", helpers.getPresets(globalPresets ? "global" : req.param("user").value()))
                     .put("status", "success")
             );
         });
@@ -63,5 +65,7 @@ public class Application extends Jooby {
                 config.getSubString("mysql", "password"),
                 config.getSubString("mysql", "database")
         );
+        helpers = new Helpers(database);
+        startServer();
     }
 }
