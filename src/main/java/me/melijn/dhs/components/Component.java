@@ -3,20 +3,31 @@ package me.melijn.dhs.components;
 public abstract class Component {
 
 
-    String name;
-    ComponentType componentType;
+    public String name;
+    public ComponentType componentType;
+    public Location location;
 
-    public Component(String name, ComponentType type) {
+    public Component(String name, Location location, ComponentType type) {
         this.name = name;
+        this.location = location;
         this.componentType = type;
     }
 
+    public String getName() {
+        return name;
+    }
+    public Location getLocation() {
+        return location;
+    }
+    public ComponentType getComponentType() {
+        return componentType;
+    }
 
-    abstract public String getName();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    abstract public void setName(String name);
-
-    abstract public ComponentType getComponentType();
-
-    abstract public void setComponentType(ComponentType componentType);
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 }
