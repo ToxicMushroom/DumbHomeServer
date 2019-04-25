@@ -10,7 +10,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -92,5 +94,23 @@ public class Database {
             logger.error("Something went wrong while executing the query: " + sql);
             e.printStackTrace();
         }
+    }
+
+    public List<SwitchComponent> getSwitchPresets(String user) {
+        List<SwitchComponent> switchComponents = new ArrayList<>();
+        try (Connection con = ds.getConnection();
+        PreparedStatement statement = con.prepareStatement("SELECT * FROM switch_presets WHERE username = ?")) {
+            statement.setString(1, user);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    //TODO use cache instead of query
+                    //switchComponents.add(new SwitchComponent(rs.getString(""), rs.getInt(""), false, 0, 0));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return switchComponents;
     }
 }
