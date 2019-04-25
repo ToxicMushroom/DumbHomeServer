@@ -9,6 +9,7 @@ public class Application extends Jooby {
 
     private final Config config;
     private final Database database;
+    private final Helpers helpers = new Helpers();
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
     {
@@ -21,9 +22,30 @@ public class Application extends Jooby {
 
 
         post("/switches/{id}/state", (req, rsp) -> {
-
             rsp.type("application/json").send(new JSONObject()
                     .put("status", "success"));
+        });
+
+        get("/views/{id}", (req, rsp) -> {
+            rsp.type("application/json").send(new JSONObject()
+                    .put("data", req.param("id").intValue())
+                    .put("status", "success")
+            );
+        });
+
+        put("/irsender/{id}", (req, rsp) -> {
+            rsp.type("application/json").send(new JSONObject()
+                    .put("status", "success")
+            );
+            logger.info(req.param("codeId").value());
+            logger.info(req.param("code").value());
+        });
+
+        get("/presets/list", (req, rsp) -> {
+            rsp.type("application/json").send(new JSONObject()
+                    .put("presetArray", helpers.getPresetList())
+                    .put("status", "success")
+            );
         });
 
         use("*", (req, rsp) -> {
