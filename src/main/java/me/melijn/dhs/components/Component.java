@@ -16,9 +16,11 @@ public abstract class Component {
     public String getName() {
         return name;
     }
+
     public Location getLocation() {
         return location;
     }
+
     public ComponentType getComponentType() {
         return componentType;
     }

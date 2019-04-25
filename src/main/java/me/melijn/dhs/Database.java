@@ -99,7 +99,7 @@ public class Database {
     public List<SwitchComponent> getSwitchPresets(String user) {
         List<SwitchComponent> switchComponents = new ArrayList<>();
         try (Connection con = ds.getConnection();
-        PreparedStatement statement = con.prepareStatement("SELECT * FROM switch_presets WHERE username = ?")) {
+             PreparedStatement statement = con.prepareStatement("SELECT * FROM switch_presets WHERE username = ?")) {
             statement.setString(1, user);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
