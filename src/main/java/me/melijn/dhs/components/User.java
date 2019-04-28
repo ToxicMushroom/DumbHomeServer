@@ -8,7 +8,7 @@ import java.util.List;
 public class User {
 
     private String name, token;
-    private List<Component> componentOverrides = new ArrayList<>();
+    private List<SwitchComponent> switchComponentOverrides = new ArrayList<>();
 
     public User(String name, String token) {
         this.name = name;
@@ -16,7 +16,7 @@ public class User {
     }
 
     public void initOverrides(Database database) {
-        componentOverrides.addAll(database.getSwitchPresets(name));
+        switchComponentOverrides.addAll(database.getSwitchPresets(name));
     }
 
     public String getName() {
@@ -27,7 +27,7 @@ public class User {
         return token;
     }
 
-    public List<Component> getComponentOverrides() {
-        return componentOverrides;
+    public List<SwitchComponent> getSwitchComponentOverrides() {
+        return switchComponentOverrides;
     }
 }
