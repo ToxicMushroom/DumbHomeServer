@@ -41,7 +41,7 @@ public class Application extends Jooby {
             if (failAuth(rsp, user)) return;
 
             if (req.param("state").booleanValue()) {
-                SwitchComponent switchComponent = cacheManager.updateSwitchState(req.param("id").intValue(), req.param("state").booleanValue());
+                SwitchComponent switchComponent = helpers.updateSwitchState(req.param("id").intValue(), req.param("state").booleanValue());
 
 
                 rsp.type("application/json").send(new JSONObject()
@@ -122,7 +122,7 @@ public class Application extends Jooby {
                 config.getSubString("mysql", "database")
         );
         cacheManager = new CacheManager(database);
-        helpers = new Helpers(database);
+        helpers = new Helpers(database, cacheManager);
         startServer();
     }
 }
