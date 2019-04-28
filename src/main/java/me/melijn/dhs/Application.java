@@ -5,6 +5,7 @@ import me.melijn.dhs.storage.CacheManager;
 import me.melijn.dhs.storage.Config;
 import me.melijn.dhs.storage.Database;
 import me.melijn.dhs.utils.Helpers;
+import me.melijn.dhs.utils.TaskManager;
 import org.jooby.Jooby;
 import org.jooby.Request;
 import org.jooby.Response;
@@ -19,6 +20,7 @@ public class Application extends Jooby {
     private final Helpers helpers;
     private final CacheManager cacheManager;
     private final Logger logger;
+    private final TaskManager taskManager;
 
     private void startServer() {
         get("/switches/{id}/state", (req, rsp) -> {
@@ -30,24 +32,22 @@ public class Application extends Jooby {
                     .put("status", "success")
             );
 
-            database.log(user, req);
+            helpers.log(user, req);
         });
 
 
         post("/switches/{id}/state", (req, rsp) -> {
-
             String user = getUserFromHeader(req);
             if (failAuth(rsp, user)) return;
 
             SwitchComponent switchComponent = helpers.updateSwitchState(req.param("id").intValue(), req.param("state").booleanValue());
-
 
             rsp.type("application/json").send(new JSONObject()
                     .put("state", switchComponent.isOn())
                     .put("status", "success")
             );
 
-            database.log(user, req);
+            helpers.log(user, req);
         });
 
         get("/views/{id}", (req, rsp) -> {
@@ -106,6 +106,7 @@ public class Application extends Jooby {
 
     public Application() {
         logger = LoggerFactory.getLogger(this.getClass().getName());
+        taskManager = new TaskManager();
         config = new Config();
         database = new Database(
                 config.getSubString("mysql", "host"),
@@ -115,7 +116,7 @@ public class Application extends Jooby {
                 config.getSubString("mysql", "database")
         );
         cacheManager = new CacheManager(database);
-        helpers = new Helpers(database, cacheManager);
+        helpers = new Helpers(database, cacheManager, taskManager);
         startServer();
     }
 }

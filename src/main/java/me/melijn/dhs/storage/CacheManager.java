@@ -37,4 +37,8 @@ public class CacheManager {
     public SwitchComponent getSwitchComponentById(int id) {
         return switchComponentList.stream().filter(switchComponent -> switchComponent.getId() == id).findAny().orElse(null);
     }
+
+    public User getUserByName(String username) {
+        return users.stream().filter(user -> user.getName().equals(username)).findAny().orElse(null);
+    }
 }

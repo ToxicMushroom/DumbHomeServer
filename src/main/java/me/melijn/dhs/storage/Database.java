@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class Database {
 
@@ -84,22 +83,6 @@ public class Database {
         return 0;
     }
 
-    private void executeQuery(final String sql, final Consumer<ResultSet> consumer, final Object... objects) {
-        try (final Connection connection = ds.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            int current = 1;
-            for (final Object object : objects) {
-                preparedStatement.setObject(current++, object);
-            }
-            try (final ResultSet resultSet = preparedStatement.executeQuery()) {
-                consumer.accept(resultSet);
-            }
-        } catch (final SQLException e) {
-            logger.error("Something went wrong while executing the query: " + sql);
-            e.printStackTrace();
-        }
-    }
-
     public List<SwitchComponent> getSwitchPresets(String username) {
         List<SwitchComponent> switchComponents = new ArrayList<>();
         try (Connection con = ds.getConnection();
@@ -107,8 +90,14 @@ public class Database {
             statement.setString(1, username);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    //TODO use cache instead of query
-                    //switchComponents.add(new SwitchComponent(rs.getString(""), rs.getInt(""), false, 0, 0));
+                    switchComponents.add(new SwitchComponent(
+                            rs.getString("name"),
+                            Location.valueOf(rs.getString("location")),
+                            rs.getInt("id"),
+                            rs.getBoolean("last_state"),
+                            rs.getInt("on_code"),
+                            rs.getInt("off_code")
+                    ));
                 }
             }
         } catch (SQLException e) {
