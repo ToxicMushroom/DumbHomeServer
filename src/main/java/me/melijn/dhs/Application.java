@@ -8,7 +8,6 @@ import me.melijn.dhs.utils.Helpers;
 import org.jooby.Jooby;
 import org.jooby.Request;
 import org.jooby.Response;
-import org.jooby.Status;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,19 +39,13 @@ public class Application extends Jooby {
             String user = getUserFromHeader(req);
             if (failAuth(rsp, user)) return;
 
-            if (req.param("state").booleanValue()) {
-                SwitchComponent switchComponent = helpers.updateSwitchState(req.param("id").intValue(), req.param("state").booleanValue());
+            SwitchComponent switchComponent = helpers.updateSwitchState(req.param("id").intValue(), req.param("state").booleanValue());
 
 
-                rsp.type("application/json").send(new JSONObject()
-                        .put("state", switchComponent.isOn())
-                        .put("status", "success")
-                );
-            } else {
-                rsp.status(Status.BAD_REQUEST)
-                        .type("application/json")
-                        .send(new JSONObject().put("status", "Bad request"));
-            }
+            rsp.type("application/json").send(new JSONObject()
+                    .put("state", switchComponent.isOn())
+                    .put("status", "success")
+            );
 
             database.log(user, req);
         });
