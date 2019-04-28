@@ -1,4 +1,4 @@
-package me.melijn.dhs;
+package me.melijn.dhs.storage;
 
 import org.json.JSONObject;
 
@@ -12,7 +12,7 @@ public class Config {
     private final File configFile = new File("config.json");
     private final JSONObject configObject;
 
-    Config() {
+    public Config() {
         if (!configFile.exists()) {
             try {
                 Files.write(Paths.get(configFile.getPath()), new JSONObject()
