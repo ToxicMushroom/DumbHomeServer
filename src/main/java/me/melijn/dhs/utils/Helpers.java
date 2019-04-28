@@ -1,6 +1,8 @@
-package me.melijn.dhs;
+package me.melijn.dhs.utils;
 
 import me.melijn.dhs.components.SwitchComponent;
+import me.melijn.dhs.storage.CacheManager;
+import me.melijn.dhs.storage.Database;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -8,9 +10,12 @@ public class Helpers {
 
 
     private final Database database;
+    private final CacheManager cacheManager;
 
-    public Helpers(Database database) {
+
+    public Helpers(Database database, CacheManager cacheManager) {
         this.database = database;
+        this.cacheManager = cacheManager;
     }
 
 
@@ -27,5 +32,19 @@ public class Helpers {
         jsonObject.put("switches", switchArray);
 
         return jsonObject;
+    }
+
+    public SwitchComponent updateSwitchState(int id, boolean state) {
+        SwitchComponent switchComponent = cacheManager.getSwitchComponentById(id);
+        if (switchComponent == null) return null;
+
+        cacheManager.switchComponentList.remove(switchComponent);
+        switchComponent.setOn(state);
+        cacheManager.switchComponentList.add(switchComponent);
+
+        database.updateSwitchState(id, state);
+        //TODO add switch sending
+
+        return switchComponent;
     }
 }
