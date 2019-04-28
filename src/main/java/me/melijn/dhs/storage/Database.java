@@ -124,6 +124,7 @@ public class Database {
              PreparedStatement statement = con.prepareStatement("SELECT * FROM switches")) {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
+                    if (rs.getString("location").isEmpty()) continue;
                     switchComponents.add(new SwitchComponent(
                             rs.getString("name"),
                             Location.valueOf(rs.getString("location")),
