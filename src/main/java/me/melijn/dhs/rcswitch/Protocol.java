@@ -25,7 +25,7 @@ package me.melijn.dhs.rcswitch;
 public class Protocol {
 
     public static final Protocol PROTOCOL_01 = new Protocol(350, new Waveform(1, 31), new Waveform(1, 3), new Waveform(3, 1), false);   // protocol 1
-    public static final Protocol PROTOCOL_433 = new Protocol(433, new Waveform(1, 31), new Waveform(1, 3), new Waveform(3, 1), false);   // protocol 433
+    public static final Protocol PROTOCOL_433 = new Protocol(430, new Waveform(1, 31), new Waveform(1, 3), new Waveform(3, 1), false);   // protocol 433
     public static final Protocol PROTOCOL_02 = new Protocol(650, new Waveform(1, 10), new Waveform(1, 2), new Waveform(2, 1), false);   // protocol 2
     public static final Protocol PROTOCOL_03 = new Protocol(100, new Waveform(30, 71), new Waveform(4, 11), new Waveform(9, 6), false); // protocol 3
     public static final Protocol PROTOCOL_04 = new Protocol(380, new Waveform(1, 6), new Waveform(1, 3), new Waveform(3, 1), false);    // protocol 4
