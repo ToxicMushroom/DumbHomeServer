@@ -1,6 +1,9 @@
 package me.melijn.dhs.utils;
 
+import com.pi4j.io.gpio.RaspiPin;
 import me.melijn.dhs.components.SwitchComponent;
+import me.melijn.dhs.rcswitch.Protocol;
+import me.melijn.dhs.rcswitch.RCSwitch;
 import me.melijn.dhs.storage.CacheManager;
 import me.melijn.dhs.storage.Database;
 import org.json.JSONArray;
@@ -37,6 +40,9 @@ public class Helpers {
     public SwitchComponent updateSwitchState(int id, boolean state) {
         SwitchComponent switchComponent = cacheManager.getSwitchComponentById(id);
         if (switchComponent == null) return null;
+
+        String code = Integer.toBinaryString(state ? switchComponent.getOnCode() : switchComponent.getOffCode());
+        new RCSwitch(RaspiPin.GPIO_07, Protocol.PROTOCOL_433).send(code);
 
         cacheManager.switchComponentList.remove(switchComponent);
         switchComponent.setOn(state);
