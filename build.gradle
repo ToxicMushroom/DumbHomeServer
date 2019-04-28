@@ -6,7 +6,7 @@ plugins {
 
 version '1.0'
 mainClassName = 'me.melijn.dhs.DumbHomeServer'
-sourceCompatibility = JavaVersion.VERSION_12
+sourceCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
     mavenCentral()
