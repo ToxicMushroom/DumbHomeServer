@@ -1,9 +1,6 @@
 package me.melijn.dhs.utils;
 
-import com.pi4j.io.gpio.RaspiPin;
 import me.melijn.dhs.components.SwitchComponent;
-import me.melijn.dhs.rcswitch.Protocol;
-import me.melijn.dhs.rcswitch.RCSwitch;
 import me.melijn.dhs.storage.CacheManager;
 import me.melijn.dhs.storage.Database;
 import org.jooby.Request;
@@ -16,7 +13,7 @@ import java.util.List;
 
 public class Helpers {
 
-    private final RCSwitch rcSwitch = new RCSwitch(RaspiPin.GPIO_00, Protocol.PROTOCOL_433);
+    //private final RCSwitch rcSwitch = new RCSwitch(RaspiPin.GPIO_00, Protocol.PROTOCOL_433);
     private final Database database;
     private final CacheManager cacheManager;
     private final TaskManager taskManager;
@@ -61,7 +58,7 @@ public class Helpers {
             String code = Integer.toBinaryString(decimal);
             code = new String(new char[(24 - code.length())]).replace("\0", "0") + code;
             logger.info("rf code sent: " + decimal + "/" + code);
-            rcSwitch.send(code); //GPIO is GPIO17 but undercover, pls save me from this suffering
+            //rcSwitch.send(code); //GPIO is GPIO17 but undercover, pls save me from this suffering
 
             database.updateSwitchState(id, state);
         });
