@@ -66,10 +66,16 @@ public class Application extends Jooby {
         });
 
         get("/presets/list", (req, rsp) -> {
+            if (!req.param("global").isSet()) return;
+            String user = "";
             boolean globalPresets = req.param("global").booleanValue();
+            if (!globalPresets) {
+                user = getUserFromHeader(req);
+                if (failAuth(rsp, user)) return;
+            }
 
             rsp.type("application/json").send(new JSONObject()
-                    .put("presets", helpers.getPresets(globalPresets ? "global" : req.param("user").value()))
+                    .put("presets", helpers.getPresets(globalPresets ? "global" : user))
                     .put("status", "success")
             );
         });

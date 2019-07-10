@@ -33,7 +33,7 @@ public class Helpers {
 
         List<SwitchComponent> switchComponents = cacheManager.switchComponentList;
         if (!username.equals("global")) {
-            switchComponents = cacheManager.getUserByName(username).getSwitchComponentOverrides();
+            switchComponents.addAll(cacheManager.getUserByName(username).getSwitchComponentOverrides());
         }
 
         for (SwitchComponent switchComponent : switchComponents) {
