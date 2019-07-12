@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:4.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.0.1'
     implementation 'org.jooby:jooby-netty:1.6.2'
     implementation 'org.jooby:jooby-jackson:1.6.2'
 
