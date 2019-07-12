@@ -32,4 +32,6 @@ public abstract class Component {
     public void setLocation(Location location) {
         this.location = location;
     }
+
+    public abstract String toJSONObject();
 }

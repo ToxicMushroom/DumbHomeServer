@@ -41,4 +41,8 @@ public class CacheManager {
     public User getUserByName(String username) {
         return users.stream().filter(user -> user.getName().equals(username)).findAny().orElse(null);
     }
+
+    public List<SwitchComponent> getSwitchComponentList() {
+        return switchComponentList;
+    }
 }

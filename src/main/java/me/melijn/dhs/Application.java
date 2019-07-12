@@ -9,9 +9,12 @@ import me.melijn.dhs.utils.TaskManager;
 import org.jooby.Jooby;
 import org.jooby.Request;
 import org.jooby.Response;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class Application extends Jooby {
 
@@ -35,6 +38,22 @@ public class Application extends Jooby {
             helpers.log(user, req);
         });
 
+        get("/switches/states", (req, rsp) -> {
+            String user = getUserFromHeader(req);
+            if (failAuth(rsp, user)) return;
+
+            JSONArray switchArray = new JSONArray();
+            List<SwitchComponent> switchComponents = cacheManager.getSwitchComponentList();
+            for (SwitchComponent switchComponent : switchComponents) {
+                switchArray.put(switchComponent.toJSONObject());
+            }
+
+            rsp.type("application/json").send(new JSONObject()
+                    .put("switches", switchArray)
+                    .put("status", "success"));
+
+            helpers.log(user, req);
+        });
 
         post("/switches/{id}/state", (req, rsp) -> {
             String user = getUserFromHeader(req);
@@ -49,6 +68,7 @@ public class Application extends Jooby {
 
             helpers.log(user, req);
         });
+
 
         get("/views/{id}", (req, rsp) -> {
             rsp.type("application/json").send(new JSONObject()

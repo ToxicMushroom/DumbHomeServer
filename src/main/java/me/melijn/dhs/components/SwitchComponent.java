@@ -34,4 +34,12 @@ public class SwitchComponent extends Component {
     public int getId() {
         return id;
     }
+
+    @Override
+    public String toJSONObject() {
+        return "{" +
+                "\n    \"id\":" + id + "," +
+                "\n    \"state\":" + on +
+                "}";
+    }
 }
