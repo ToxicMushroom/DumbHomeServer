@@ -10,10 +10,12 @@ import me.melijn.dhs.utils.RCSwitchUtil
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class ChaconService(val locationSettings: Settings.Location, val dbManager: DBManager) : Service("Chacon") {
+class ChaconService(
+    private val dbManager: DBManager,
+    private val locationSettings: Settings.Location
+) : Service("Chacon", 5, unit = TimeUnit.SECONDS) {
 
-
-    val chaconService = Runnable {
+    override val service = Runnable {
         runBlocking {
             val timeZone = TimeZone.getTimeZone(locationSettings.timeZone)
             val calendar = Calendar.getInstance(timeZone)
@@ -41,15 +43,6 @@ class ChaconService(val locationSettings: Settings.Location, val dbManager: DBMa
                 }
             }
         }
-    }
-
-    override fun start() {
-        future = scheduledExecutor.scheduleAtFixedRate(chaconService, 0, 3L, TimeUnit.SECONDS)
-    }
-
-
-    override fun stop() {
-        future.cancel(false)
     }
 
     private fun getSecondsFromHoursMinute(hoursMinutes: String): Int {

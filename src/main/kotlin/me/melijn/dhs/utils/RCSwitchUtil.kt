@@ -1,11 +1,11 @@
 package me.melijn.dhs.utils
 
-import bot.zerotwo.helper.threading.TaskManager
 import com.pi4j.io.gpio.RaspiPin
 import me.melijn.dhs.database.CacheManager
 import me.melijn.dhs.objects.components.SwitchComponent
 import me.melijn.dhs.objects.rcswitch.Protocol
 import me.melijn.dhs.objects.rcswitch.RCSwitch
+import me.melijn.dhs.threading.TaskManager
 
 object RCSwitchUtil {
 

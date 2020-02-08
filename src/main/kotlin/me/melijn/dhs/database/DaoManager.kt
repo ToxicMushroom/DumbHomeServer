@@ -19,7 +19,7 @@ class DaoManager(driverManager: DriverManager) {
     val irDao = IRDao(driverManager)
 
     val buttonDao = ButtonDao(driverManager)
-    val buttonPresetDao = ButtonPresetDao()
+    val buttonPresetDao = ButtonPresetDao(driverManager)
 
     val viewDao = ViewDao(driverManager)
     val viewPresetDao = ViewPresetDao(driverManager)

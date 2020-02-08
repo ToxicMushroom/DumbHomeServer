@@ -6,7 +6,7 @@ import me.melijn.dhs.objects.components.User
 
 class CacheManager(private val dbManager: DBManager) {
 
-    val users = mutableListOf<User>()
+    private val users = mutableListOf<User>()
     val switchComponentList = mutableListOf<SwitchComponent>()
 
     suspend fun refreshCaches() {

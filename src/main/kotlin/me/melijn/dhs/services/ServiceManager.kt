@@ -1,20 +1,18 @@
 package me.melijn.dhs.services
 
-import bot.zerotwo.helper.threading.TaskManager
 import me.melijn.dhs.database.DBManager
 import me.melijn.dhs.objects.Settings
 import me.melijn.dhs.services.chacon.ChaconService
+import me.melijn.dhs.services.chacon.LogService
 
-class ServiceManager(val taskManager: TaskManager, settings: Settings, dbManager: DBManager) {
+class ServiceManager(settings: Settings, dbManager: DBManager) {
 
     var started = false
-    private val services = mutableListOf<Service>()
 
-    init {
-        services.add(
-            ChaconService(settings.location, dbManager)
-        )
-    }
+    private val services = mutableListOf(
+        ChaconService(dbManager, settings.location),
+        LogService(dbManager.logWrapper, settings.logDays)
+    )
 
     fun startServices() {
         services.forEach { service ->

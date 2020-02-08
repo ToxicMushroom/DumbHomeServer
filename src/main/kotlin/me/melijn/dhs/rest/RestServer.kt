@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory
 
 val OBJECT_MAPPER = jacksonObjectMapper()
 
-class RestServer(val container: Container) : Jooby() {
+class RestServer(private val container: Container) : Jooby() {
 
     private val logger: Logger = LoggerFactory.getLogger(RestServer::class.java.name)
-    val cacheManager = container.cacheManager
-    val taskManager = container.taskManager
+    private val cacheManager = container.cacheManager
+    private val taskManager = container.taskManager
 
 
     init {
@@ -43,6 +43,8 @@ class RestServer(val container: Container) : Jooby() {
 
             log(user, req)
         }
+
+
         get("/switches/states") { req: Request, rsp: Response ->
             val user = getAndVerifyUserFromHeader(req, rsp) ?: return@get
 
@@ -59,16 +61,20 @@ class RestServer(val container: Container) : Jooby() {
 
             log(user, req)
         }
+
+
         post("/switches/{id}/state") { req: Request, rsp: Response ->
             val user = getAndVerifyUserFromHeader(req, rsp) ?: return@post
 
             val switchComponent = RCSwitchUtil.updateSwitchState(
                 cacheManager, taskManager, req.param("id").intValue(), req.param("state").booleanValue()
             )
+
             if (switchComponent == null) {
                 send400(rsp)
                 return@post
             }
+
             rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("state", switchComponent.isOn)
                 .put("status", "success")
@@ -76,12 +82,16 @@ class RestServer(val container: Container) : Jooby() {
 
             log(user, req)
         }
+
+
         get("/views/{id}") { req: Request, rsp: Response ->
             rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("data", req.param("id").intValue())
                 .put("status", "success")
             )
         }
+
+
         post("/irsender/{id}") { req: Request, rsp: Response ->
             rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("status", "success")
@@ -89,6 +99,8 @@ class RestServer(val container: Container) : Jooby() {
             logger.info(req.param("codeId").value())
             logger.info(req.param("code").value())
         }
+
+
         get("/presets/list") { req: Request, rsp: Response ->
             if (!req.param("global").isSet) return@get
 
@@ -102,6 +114,8 @@ class RestServer(val container: Container) : Jooby() {
                 .set<JsonNode>("presets", ComponentUtil.getPresets(cacheManager, if (globalPresets) "global" else user))
             )
         }
+
+
         post("/refreshcache") { req, rsp ->
             val user = getAndVerifyUserFromHeader(req, rsp) ?: return@post
 
@@ -115,20 +129,25 @@ class RestServer(val container: Container) : Jooby() {
 
             log(user, req)
         }
-        use("*") { req: Request?, rsp: Response ->
+
+
+        use("*") { _: Request?, rsp: Response ->
             rsp.send("blub")
         }
     }
 
+
     private fun send400(rsp: Response) {
         rsp.status(400).send("Bad Request")
     }
+
 
     private fun getAndVerifyUserFromHeader(req: Request, rsp: Response): String? {
         val user = getUserFromHeader(req)
         return if (failAuth(rsp, user)) null
         else user
     }
+
 
     private fun failAuth(rsp: Response, user: String?): Boolean {
         if (user == null) {
@@ -145,6 +164,7 @@ class RestServer(val container: Container) : Jooby() {
         return false
     }
 
+
     private fun getUserFromHeader(req: Request): String? {
         var user: String? = null
         if (req.headers().containsKey("token")) {
@@ -158,10 +178,10 @@ class RestServer(val container: Container) : Jooby() {
         return user
     }
 
+
     private fun log(user: String, req: Request) {
         taskManager.async {
             container.dbManager.logWrapper.log(user, req.ip() + "/" + req.method() + " - " + req.path())
         }
     }
-
 }

@@ -96,7 +96,7 @@ class RCSwitch @JvmOverloads constructor(transmitterPin: Pin?, protocol: Protoco
      */
     fun send(bitString: String) {
         val bitSet = BitSet(bitString.length)
-        for (i in 0 until bitString.length) {
+        for (i in bitString.indices) {
             if (bitString[i] == '1') {
                 bitSet.set(i)
             }
