@@ -11,22 +11,26 @@ object RCSwitchUtil {
 
     private val rcSwitch = RCSwitch(RaspiPin.GPIO_00, Protocol.PROTOCOL_433)
 
-    fun sendRCSwitchCode(code: Int) {
+    fun sendRCSwitchCode(cacheManager: CacheManager, code: Int) {
+        val switchComponent: SwitchComponent? = cacheManager.getSwitchComponentByCode(code)
         var rcCode = Integer.toBinaryString(code)
         rcCode = String(CharArray(24 - rcCode.length)).replace("\u0000", "0") + rcCode
         rcSwitch.send(rcCode)
+
+        if (switchComponent != null) {
+            cacheManager.switchComponentList.remove(switchComponent)
+            switchComponent.isOn = code == switchComponent.onCode
+            cacheManager.switchComponentList.add(switchComponent)
+        }
     }
 
     fun updateSwitchState(cacheManager: CacheManager, taskManager: TaskManager, id: Int, state: Boolean): SwitchComponent? {
         val switchComponent = cacheManager.getSwitchComponentById(id) ?: return null
         taskManager.async {
             val decimal = if (state) switchComponent.onCode else switchComponent.offCode
-            sendRCSwitchCode(decimal) //GPIO is GPIO17 but undercover, pls save me from this suffering
+            sendRCSwitchCode(cacheManager, decimal) //GPIO is GPIO17 but undercover, pls save me from this suffering
         }
 
-        cacheManager.switchComponentList.remove(switchComponent)
-        switchComponent.isOn = state
-        cacheManager.switchComponentList.add(switchComponent)
         return switchComponent
     }
 }

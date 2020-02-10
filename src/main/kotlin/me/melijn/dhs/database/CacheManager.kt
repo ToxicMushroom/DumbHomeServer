@@ -41,6 +41,11 @@ class CacheManager(private val dbManager: DBManager) {
             .orElse(null)
     }
 
+    fun getSwitchComponentByCode(code: Int): SwitchComponent? {
+        return switchComponentList
+            .firstOrNull { it.onCode == code || it.offCode == code }
+    }
+
     init {
         runBlocking {
             refreshCaches()
