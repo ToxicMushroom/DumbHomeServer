@@ -1,17 +1,17 @@
 package me.melijn.dhs.services
 
-import me.melijn.dhs.database.DBManager
+import me.melijn.dhs.database.CacheManager
 import me.melijn.dhs.objects.Settings
 import me.melijn.dhs.services.chacon.ChaconService
 import me.melijn.dhs.services.chacon.LogService
 
-class ServiceManager(settings: Settings, dbManager: DBManager) {
+class ServiceManager(settings: Settings, cacheManager: CacheManager) {
 
     var started = false
 
     private val services = mutableListOf(
-        ChaconService(dbManager, settings.location),
-        LogService(dbManager.logWrapper, settings.logDays)
+        ChaconService(cacheManager, settings.location),
+        LogService(cacheManager.dbManager.logWrapper, settings.logDays)
     )
 
     fun startServices() {

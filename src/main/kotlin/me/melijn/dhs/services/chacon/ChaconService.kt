@@ -3,7 +3,7 @@ package me.melijn.dhs.services.chacon
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator
 import com.luckycatlabs.sunrisesunset.dto.Location
 import kotlinx.coroutines.runBlocking
-import me.melijn.dhs.database.DBManager
+import me.melijn.dhs.database.CacheManager
 import me.melijn.dhs.objects.Settings
 import me.melijn.dhs.services.Service
 import me.melijn.dhs.utils.RCSwitchUtil
@@ -11,7 +11,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ChaconService(
-    private val dbManager: DBManager,
+    private val cacheManager: CacheManager,
     private val locationSettings: Settings.Location
 ) : Service("Chacon", 5, unit = TimeUnit.SECONDS) {
 
@@ -20,7 +20,7 @@ class ChaconService(
             val timeZone = TimeZone.getTimeZone(locationSettings.timeZone)
             val calendar = Calendar.getInstance(timeZone)
             val timeInSeconds = calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60
-            val switchServiceActions = dbManager.switchServiceWrapper.getEnabledSwitchServices().toMutableList()
+            val switchServiceActions = cacheManager.dbManager.switchServiceWrapper.getEnabledSwitchServices().toMutableList()
 
             val location = Location(locationSettings.latitude, locationSettings.longitude)
 
@@ -38,7 +38,7 @@ class ChaconService(
 
             for (serviceAction in filteredSwitchServiceActionList) {
                 for (code in serviceAction.codes) {
-                    RCSwitchUtil.sendRCSwitchCode(code)
+                    RCSwitchUtil.sendRCSwitchCode(cacheManager, code)
                     logger.info("Sent via rc: $code")
                 }
             }

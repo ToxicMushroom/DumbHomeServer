@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import me.melijn.dhs.objects.components.SwitchComponent
 import me.melijn.dhs.objects.components.User
 
-class CacheManager(private val dbManager: DBManager) {
+class CacheManager(val dbManager: DBManager) {
 
     private val users = mutableListOf<User>()
     val switchComponentList = mutableListOf<SwitchComponent>()
