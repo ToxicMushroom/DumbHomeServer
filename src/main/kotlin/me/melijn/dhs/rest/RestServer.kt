@@ -67,7 +67,7 @@ class RestServer(private val container: Container) : Jooby() {
             val user = getAndVerifyUserFromHeader(req, rsp) ?: return@post
 
             val switchComponent = RCSwitchUtil.updateSwitchState(
-                cacheManager, taskManager, req.param("id").intValue(), req.param("state").booleanValue()
+                cacheManager, req.param("id").intValue(), req.param("state").booleanValue()
             )
 
             if (switchComponent == null) {

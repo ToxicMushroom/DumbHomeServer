@@ -5,7 +5,6 @@ import me.melijn.dhs.database.CacheManager
 import me.melijn.dhs.objects.components.SwitchComponent
 import me.melijn.dhs.objects.rcswitch.Protocol
 import me.melijn.dhs.objects.rcswitch.RCSwitch
-import me.melijn.dhs.threading.TaskManager
 
 object RCSwitchUtil {
 
@@ -24,12 +23,11 @@ object RCSwitchUtil {
         }
     }
 
-    fun updateSwitchState(cacheManager: CacheManager, taskManager: TaskManager, id: Int, state: Boolean): SwitchComponent? {
+    fun updateSwitchState(cacheManager: CacheManager, id: Int, state: Boolean): SwitchComponent? {
         val switchComponent = cacheManager.getSwitchComponentById(id) ?: return null
-        taskManager.async {
-            val decimal = if (state) switchComponent.onCode else switchComponent.offCode
-            sendRCSwitchCode(cacheManager, decimal) //GPIO is GPIO17 but undercover, pls save me from this suffering
-        }
+
+        val decimal = if (state) switchComponent.onCode else switchComponent.offCode
+        sendRCSwitchCode(cacheManager, decimal) //GPIO is GPIO17 but undercover, pls save me from this suffering
 
         return switchComponent
     }
