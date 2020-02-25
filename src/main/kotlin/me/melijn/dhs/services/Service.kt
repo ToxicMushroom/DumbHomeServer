@@ -12,9 +12,9 @@ abstract class Service(
     private val unit: TimeUnit = TimeUnit.SECONDS
 ) {
 
-    private val threadFactory: ThreadFactory = ThreadFactoryBuilder().setNameFormat("[$name-Service] ").build()
+    private val threadFactory: ThreadFactory = ThreadFactoryBuilder().setNameFormat("[$name-Service]").build()
     private val scheduledExecutor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory)
-    lateinit var future: ScheduledFuture<*>
+    private lateinit var future: ScheduledFuture<*>
     val logger: Logger = LoggerFactory.getLogger(name)
 
     abstract val service: Runnable

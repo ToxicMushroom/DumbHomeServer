@@ -17,7 +17,7 @@ class LogDao(driverManager: DriverManager) : Dao(driverManager) {
 
     suspend fun deleteOldLogs(logDays: Int) {
         driverManager.executeUpdate("DELETE FROM $table WHERE moment < ?",
-            System.currentTimeMillis() - logDays * DAY_IN_MILLIS
+            System.nanoTime() - logDays * DAY_IN_MILLIS * 1_000_000
         )
     }
 

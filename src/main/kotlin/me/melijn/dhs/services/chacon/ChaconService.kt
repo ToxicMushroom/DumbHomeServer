@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 class ChaconService(
     private val cacheManager: CacheManager,
     private val locationSettings: Settings.Location
-) : Service("Chacon", 5, unit = TimeUnit.SECONDS) {
+) : Service("Chacon", 10, unit = TimeUnit.SECONDS) {
 
     override val service = Runnable {
         runBlocking {
