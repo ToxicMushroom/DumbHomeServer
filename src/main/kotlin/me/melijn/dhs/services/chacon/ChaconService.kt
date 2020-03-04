@@ -31,7 +31,9 @@ class ChaconService(
 
             val filteredSwitchServiceActionList = switchServiceActions.filter {
                 it.days.contains(calendar.get(Calendar.DAY_OF_WEEK))
-                    && (it.time == "$timeInSeconds" ||
+                    && ((it.time.toIntOrNull()?.let { time ->
+                    time > (timeInSeconds - 30) && time <= (timeInSeconds + 30)
+                } ?: false) ||
                     (it.time == "sunset" && timeInSeconds == sunset) ||
                     (it.time == "sunrise" && timeInSeconds == sunrise))
             }
