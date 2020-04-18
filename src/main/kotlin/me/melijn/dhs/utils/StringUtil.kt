@@ -8,3 +8,11 @@ fun String.splitIETEL(delimiter: String): List<String> {
         res
     }
 }
+
+fun String.remove(vararg strings: String, ignoreCase: Boolean = false): String {
+    var newString = this
+    for (string in strings) {
+        newString = newString.replace(string, "", ignoreCase)
+    }
+    return newString
+}

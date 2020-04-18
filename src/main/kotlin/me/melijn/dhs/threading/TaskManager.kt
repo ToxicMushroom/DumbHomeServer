@@ -10,16 +10,16 @@ import java.util.concurrent.Executors
 
 class TaskManager {
 
-    private val threadFactory = { name: String -> ThreadFactoryBuilder().setNameFormat("[$name-Pool-%d] ").build() }
-    private val executorService: ExecutorService = Executors.newCachedThreadPool(threadFactory.invoke("Task"))
+    private val threadFactory = { name: String ->
+        ThreadFactoryBuilder().setNameFormat("[$name-Pool-%d]").build()
+    }
+    val executorService: ExecutorService = Executors.newCachedThreadPool(threadFactory.invoke("Task"))
     private val dispatcher = executorService.asCoroutineDispatcher()
 
     fun async(block: suspend CoroutineScope.() -> Unit) = CoroutineScope(dispatcher).launch {
-        val task = Task(Runnable {
-            CoroutineScope(dispatcher).launch {
-                block.invoke(this)
-            }
-        })
+        val task = Task {
+            block.invoke(this)
+        }
         task.run()
     }
 }

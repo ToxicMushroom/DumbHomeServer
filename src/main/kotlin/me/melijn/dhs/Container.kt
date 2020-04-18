@@ -15,5 +15,6 @@ class Container {
     val dbManager = DBManager(settings.database)
     val cacheManager = CacheManager(dbManager)
     val serviceManager = ServiceManager(settings, cacheManager)
+    val startTime = System.currentTimeMillis()
 
 }

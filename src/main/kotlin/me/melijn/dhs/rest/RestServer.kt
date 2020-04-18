@@ -3,16 +3,18 @@ package me.melijn.dhs.rest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.sun.management.OperatingSystemMXBean
 import kotlinx.coroutines.runBlocking
 import me.melijn.dhs.Container
-import me.melijn.dhs.utils.ComponentUtil
-import me.melijn.dhs.utils.RCSwitchUtil
+import me.melijn.dhs.utils.*
 import org.jooby.Jooby
 import org.jooby.MediaType
 import org.jooby.Request
 import org.jooby.Response
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ThreadPoolExecutor
 
 val OBJECT_MAPPER = jacksonObjectMapper()
 
@@ -28,6 +30,38 @@ class RestServer(private val container: Container) : Jooby() {
     }
 
     private fun startServer() {
+        get("/stats") { req: Request, rsp: Response ->
+            val bean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
+            val totalMem = bean.totalPhysicalMemorySize shr 20
+
+            val usedMem = if (OSValidator.isUnix) {
+                totalMem - getUnixRam()
+            } else {
+                totalMem - (bean.freeSwapSpaceSize shr 20)
+            }
+            val totalJVMMem = ManagementFactory.getMemoryMXBean().heapMemoryUsage.max shr 20
+            val usedJVMMem = ManagementFactory.getMemoryMXBean().heapMemoryUsage.used shr 20
+
+            var dumbHomeThreads = 0
+            dumbHomeThreads += (container.taskManager.executorService as ThreadPoolExecutor).activeCount
+            container.serviceManager.services.forEach { service ->
+                val exec = service.scheduledExecutor as ThreadPoolExecutor
+                dumbHomeThreads += exec.activeCount + exec.queue.size
+            }
+
+            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+                .put("uptime", ManagementFactory.getRuntimeMXBean().uptime)
+                .put("dumbhomeThreads", dumbHomeThreads)
+                .put("jvmramUsage", usedJVMMem)
+                .put("jvmramTotal", totalJVMMem)
+                .put("jvmThreads", Thread.activeCount())
+                .put("cpuUsage", bean.processCpuLoad * 100)
+                .put("uptime", getSystemUptime())
+                .put("ramUsage", usedMem)
+                .put("ramTotal", totalMem)
+            )
+        }
+
         get("/switches/{id}/state") { req: Request, rsp: Response ->
             val user = getAndVerifyUserFromHeader(req, rsp) ?: return@get
             val switchComponent = cacheManager.getSwitchComponentById(req.param("id").intValue())

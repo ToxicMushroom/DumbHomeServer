@@ -9,7 +9,7 @@ class ServiceManager(settings: Settings, cacheManager: CacheManager) {
 
     var started = false
 
-    private val services = mutableListOf(
+    val services = mutableListOf(
         ChaconService(cacheManager, settings.location),
         LogService(cacheManager.dbManager.logWrapper, settings.logDays)
     )
