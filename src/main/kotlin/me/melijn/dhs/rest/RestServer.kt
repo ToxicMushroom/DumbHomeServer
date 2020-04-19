@@ -30,7 +30,7 @@ class RestServer(private val container: Container) : Jooby() {
     }
 
     private fun startServer() {
-        get("/stats") { req: Request, rsp: Response ->
+        get("/stats") { _: Request, rsp: Response ->
             val bean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
             val totalMem = bean.totalPhysicalMemorySize shr 20
 
@@ -44,21 +44,18 @@ class RestServer(private val container: Container) : Jooby() {
 
             var dumbHomeThreads = 0
             dumbHomeThreads += (container.taskManager.executorService as ThreadPoolExecutor).activeCount
-            container.serviceManager.services.forEach { service ->
-                val exec = service.scheduledExecutor as ThreadPoolExecutor
-                dumbHomeThreads += exec.activeCount + exec.queue.size
-            }
+            dumbHomeThreads += container.serviceManager.services.size
 
             rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
-                .put("uptime", ManagementFactory.getRuntimeMXBean().uptime)
+                .put("jvmUptime", System.currentTimeMillis() - container.startTime)
+                .put("uptime", getSystemUptime())
+                .put("jvmThreads", Thread.activeCount())
                 .put("dumbhomeThreads", dumbHomeThreads)
                 .put("jvmramUsage", usedJVMMem)
                 .put("jvmramTotal", totalJVMMem)
-                .put("jvmThreads", Thread.activeCount())
-                .put("cpuUsage", bean.processCpuLoad * 100)
-                .put("uptime", getSystemUptime())
                 .put("ramUsage", usedMem)
                 .put("ramTotal", totalMem)
+                .put("cpuUsage", bean.processCpuLoad * 100)
             )
         }
 
