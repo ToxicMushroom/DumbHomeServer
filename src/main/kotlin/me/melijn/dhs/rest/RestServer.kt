@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.sun.management.OperatingSystemMXBean
+import io.jooby.Context
+import io.jooby.Jooby
+import io.jooby.MediaType
+import io.jooby.json.JacksonModule
 import kotlinx.coroutines.runBlocking
 import me.melijn.dhs.Container
 import me.melijn.dhs.utils.*
-import org.jooby.Jooby
-import org.jooby.MediaType
-import org.jooby.Request
-import org.jooby.Response
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.lang.management.ManagementFactory
@@ -30,7 +30,8 @@ class RestServer(private val container: Container) : Jooby() {
     }
 
     private fun startServer() {
-        get("/stats") { _: Request, rsp: Response ->
+        install(JacksonModule())
+        get("/stats") { ctx ->
             val bean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
             val totalMem = bean.totalPhysicalMemorySize shr 20
 
@@ -46,7 +47,8 @@ class RestServer(private val container: Container) : Jooby() {
             dumbHomeThreads += (container.taskManager.executorService as ThreadPoolExecutor).activeCount
             dumbHomeThreads += container.serviceManager.services.size
 
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+            ctx.setResponseType(MediaType.json)
+                .send(OBJECT_MAPPER.createObjectNode()
                 .put("jvmUptime", System.currentTimeMillis() - container.startTime)
                 .put("uptime", getSystemUptime())
                 .put("jvmThreads", Thread.activeCount())
@@ -55,137 +57,144 @@ class RestServer(private val container: Container) : Jooby() {
                 .put("jvmramTotal", totalJVMMem)
                 .put("ramUsage", usedMem)
                 .put("ramTotal", totalMem)
-                .put("cpuUsage", bean.processCpuLoad * 100)
+                .put("cpuUsage", bean.processCpuLoad * 100).toString()
             )
         }
 
-        get("/switches/{id}/state") { req: Request, rsp: Response ->
-            val user = getAndVerifyUserFromHeader(req, rsp) ?: return@get
-            val switchComponent = cacheManager.getSwitchComponentById(req.param("id").intValue())
+        get("/switches/{id}/state") { ctx ->
+            val user = getAndVerifyUserFromHeader(ctx) ?: return@get 0
+            val switchComponent = cacheManager.getSwitchComponentById(ctx.path("id").intValue())
             if (switchComponent == null) {
-                send400(rsp)
-                return@get
+                send400(ctx)
+                return@get 0
             }
 
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("state", switchComponent.isOn)
-                .put("status", "success")
+                .put("status", "success").toString()
             )
 
-            log(user, req)
+            log(user, ctx)
         }
 
 
-        get("/switches/states") { req: Request, rsp: Response ->
-            val user = getAndVerifyUserFromHeader(req, rsp) ?: return@get
+        get("/switches/states") { ctx ->
+            val user = getAndVerifyUserFromHeader(ctx) ?: return@get 0
 
             val switchArray: ArrayNode = OBJECT_MAPPER.createArrayNode()
             val switchComponents = cacheManager.switchComponentList
             for (switchComponent in switchComponents) {
                 switchArray.add(switchComponent.toObjectNode())
             }
-            rsp.type(MediaType.json).send(
+            ctx.setResponseType(MediaType.json).send(
                 OBJECT_MAPPER.createObjectNode()
                     .put("status", "success")
                     .set<JsonNode>("switches", switchArray)
+                    .toString()
             )
 
-            log(user, req)
+            log(user, ctx)
         }
 
 
-        post("/switches/{id}/state") { req: Request, rsp: Response ->
-            val user = getAndVerifyUserFromHeader(req, rsp) ?: return@post
+        post("/switches/{id}/state") { ctx ->
+            val user = getAndVerifyUserFromHeader(ctx) ?: return@post 0
 
             val switchComponent = RCSwitchUtil.updateSwitchState(
-                cacheManager, req.param("id").intValue(), req.param("state").booleanValue()
+                cacheManager, ctx.path("id").intValue(), ctx.query("state").booleanValue()
             )
 
             if (switchComponent == null) {
-                send400(rsp)
-                return@post
+                send400(ctx)
+                return@post 0
             }
 
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("state", switchComponent.isOn)
                 .put("status", "success")
+                .toString()
             )
 
-            log(user, req)
+            log(user, ctx)
         }
 
 
-        get("/views/{id}") { req: Request, rsp: Response ->
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
-                .put("data", req.param("id").intValue())
+        get("/views/{id}") { ctx ->
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+                .put("data", ctx.path("id").intValue())
                 .put("status", "success")
+                .toString()
             )
         }
 
 
-        post("/irsender/{id}") { req: Request, rsp: Response ->
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+        post("/irsender/{id}") { ctx ->
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("status", "success")
+                .toString()
             )
-            logger.info(req.param("codeId").value())
-            logger.info(req.param("code").value())
+            logger.info(ctx.query("codeId").value())
+            logger.info(ctx.query("code").value())
         }
 
 
-        get("/presets/list") { req: Request, rsp: Response ->
-            if (!req.param("global").isSet) return@get
+        get("/presets/list") { ctx ->
+            if (ctx.query("global").isMissing) return@get 0
 
-            val globalPresets = req.param("global").booleanValue()
+            val globalPresets = ctx.query("global").booleanValue()
             val user = if (!globalPresets) {
-                getAndVerifyUserFromHeader(req, rsp) ?: return@get
+                getAndVerifyUserFromHeader(ctx) ?: return@get 0
             } else "global"
 
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("status", "success")
                 .set<JsonNode>("presets", ComponentUtil.getPresets(cacheManager, if (globalPresets) "global" else user))
+                .toString()
             )
         }
 
 
-        post("/refreshcache") { req, rsp ->
-            val user = getAndVerifyUserFromHeader(req, rsp) ?: return@post
+        post("/refreshcache") {ctx ->
+            val user = getAndVerifyUserFromHeader(ctx) ?: return@post "a"
 
             runBlocking {
                 cacheManager.refreshCaches()
             }
 
-            rsp.type(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
+            ctx.setResponseType(MediaType.json).send(OBJECT_MAPPER.createObjectNode()
                 .put("status", "success")
+                .toString()
             )
 
-            log(user, req)
+            log(user, ctx)
         }
 
 
-        use("*") { _: Request?, rsp: Response ->
-            rsp.send("blub")
+        get("*") { ctx ->
+            ctx.send("blub")
         }
     }
 
 
-    private fun send400(rsp: Response) {
-        rsp.status(400).send("Bad Request")
+    private fun send400(rsp: Context) {
+        rsp.setResponseCode(400).send("Bad Request")
     }
 
 
-    private fun getAndVerifyUserFromHeader(req: Request, rsp: Response): String? {
-        val user = getUserFromHeader(req)
-        return if (failAuth(rsp, user)) null
+    private fun getAndVerifyUserFromHeader(ctx: Context): String? {
+        val user = getUserFromHeader(ctx)
+        return if (failAuth(ctx, user)) null
         else user
     }
 
 
-    private fun failAuth(rsp: Response, user: String?): Boolean {
+    private fun failAuth(ctx: Context, user: String?): Boolean {
         if (user == null) {
             try {
-                rsp.type("application/json").send(
+                ctx.setResponseType("application/json").send(
                     OBJECT_MAPPER.createObjectNode()
                         .put("status", "failed authentication")
+                        .toString()
                 )
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
@@ -196,23 +205,23 @@ class RestServer(private val container: Container) : Jooby() {
     }
 
 
-    private fun getUserFromHeader(req: Request): String? {
+    private fun getUserFromHeader(ctx: Context): String? {
         var user: String? = null
-        if (req.headers().containsKey("token")) {
-            user = cacheManager.getUsernameFromToken(req.header("token").value())
+        if (ctx.headerMap().containsKey("token")) {
+            user = cacheManager.getUsernameFromToken(ctx.header("token").value())
         }
         logger.info("{}/{} - {} - {}",
-            req.ip(),
-            req.method(),
+            ctx.remoteAddress,
+            ctx.method,
             user ?: "unauthorized",
-            req.path())
+            ctx.path())
         return user
     }
 
 
-    private fun log(user: String, req: Request) {
+    private fun log(user: String, ctx: Context) {
         taskManager.async {
-            container.dbManager.logWrapper.log(user, req.ip() + "/" + req.method() + " - " + req.path())
+            container.dbManager.logWrapper.log(user, ctx.remoteAddress + "/" + ctx.method + " - " + ctx.path())
         }
     }
 }

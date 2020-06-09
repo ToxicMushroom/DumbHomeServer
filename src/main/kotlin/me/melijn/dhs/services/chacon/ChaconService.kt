@@ -5,7 +5,7 @@ import com.luckycatlabs.sunrisesunset.dto.Location
 import me.melijn.dhs.database.CacheManager
 import me.melijn.dhs.objects.Settings
 import me.melijn.dhs.services.Service
-import me.melijn.dhs.threading.Task
+import me.melijn.dhs.threading.RunnableTask
 import me.melijn.dhs.utils.RCSwitchUtil
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -15,7 +15,7 @@ class ChaconService(
     private val locationSettings: Settings.Location
 ) : Service("Chacon", 10, unit = TimeUnit.SECONDS) {
 
-    override val service = Task {
+    override val service = RunnableTask {
         val timeZone = TimeZone.getTimeZone(locationSettings.timeZone)
         val calendar = Calendar.getInstance(timeZone)
         val timeInSeconds = calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60

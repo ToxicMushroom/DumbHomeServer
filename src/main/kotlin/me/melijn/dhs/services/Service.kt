@@ -1,7 +1,7 @@
 package me.melijn.dhs.services
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import me.melijn.dhs.threading.Task
+import me.melijn.dhs.threading.RunnableTask
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.*
@@ -18,7 +18,7 @@ abstract class Service(
     private lateinit var future: ScheduledFuture<*>
     val logger: Logger = LoggerFactory.getLogger(name)
 
-    abstract val service: Task
+    abstract val service: RunnableTask
 
     open fun start() {
         future = scheduledExecutor.scheduleAtFixedRate(service, initialDelay, period, unit)

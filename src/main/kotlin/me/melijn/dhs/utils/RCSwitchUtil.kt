@@ -8,6 +8,8 @@ import me.melijn.dhs.objects.rcswitch.RCSwitch
 
 object RCSwitchUtil {
 
+    // if you want the actual addresses use:
+    // gpio readall
     private val rcSwitch = RCSwitch(RaspiPin.GPIO_00, Protocol.PROTOCOL_433)
 
     fun sendRCSwitchCode(cacheManager: CacheManager, code: Int) {
