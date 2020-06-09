@@ -49,16 +49,16 @@ class RestServer(private val container: Container) : Jooby() {
 
             ctx.setResponseType(MediaType.json)
                 .send(OBJECT_MAPPER.createObjectNode()
-                .put("jvmUptime", System.currentTimeMillis() - container.startTime)
-                .put("uptime", getSystemUptime())
-                .put("jvmThreads", Thread.activeCount())
-                .put("dumbhomeThreads", dumbHomeThreads)
-                .put("jvmramUsage", usedJVMMem)
-                .put("jvmramTotal", totalJVMMem)
-                .put("ramUsage", usedMem)
-                .put("ramTotal", totalMem)
-                .put("cpuUsage", bean.processCpuLoad * 100).toString()
-            )
+                    .put("jvmUptime", System.currentTimeMillis() - container.startTime)
+                    .put("uptime", getSystemUptime())
+                    .put("jvmThreads", Thread.activeCount())
+                    .put("dumbhomeThreads", dumbHomeThreads)
+                    .put("jvmramUsage", usedJVMMem)
+                    .put("jvmramTotal", totalJVMMem)
+                    .put("ramUsage", usedMem)
+                    .put("ramTotal", totalMem)
+                    .put("cpuUsage", bean.processCpuLoad * 100).toString()
+                )
         }
 
         get("/switches/{id}/state") { ctx ->
@@ -101,7 +101,7 @@ class RestServer(private val container: Container) : Jooby() {
             val user = getAndVerifyUserFromHeader(ctx) ?: return@post 0
 
             val switchComponent = RCSwitchUtil.updateSwitchState(
-                cacheManager, ctx.path("id").intValue(), ctx.query("state").booleanValue()
+                cacheManager, ctx.path("id").intValue(), ctx.form("state").booleanValue()
             )
 
             if (switchComponent == null) {
@@ -133,8 +133,8 @@ class RestServer(private val container: Container) : Jooby() {
                 .put("status", "success")
                 .toString()
             )
-            logger.info(ctx.query("codeId").value())
-            logger.info(ctx.query("code").value())
+            logger.info(ctx.form("codeId").value())
+            logger.info(ctx.form("code").value())
         }
 
 
@@ -154,7 +154,7 @@ class RestServer(private val container: Container) : Jooby() {
         }
 
 
-        post("/refreshcache") {ctx ->
+        post("/refreshcache") { ctx ->
             val user = getAndVerifyUserFromHeader(ctx) ?: return@post "a"
 
             runBlocking {
