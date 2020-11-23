@@ -53,7 +53,7 @@ dependencies {
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
 
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-jdk8', version: '1.4.1'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-jdk8', version: '1.4.1-native-mt'
 }
 
 compileJava.options.encoding = 'UTF-8'
